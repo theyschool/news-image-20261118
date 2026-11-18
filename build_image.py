@@ -66,78 +66,63 @@ def draw_centered(draw, cx, y, s, f, fill, tracking=0):
 # ---------------------------------------------------------------- illustrations
 # Every picture is drawn from primitives: flat colour, bold shapes, no text.
 
-def ill_bridge(draw, box):
-    """Crimean bridge: suspension bridge, middle span collapsed into the sea."""
+def ill_summit(draw, box):
+    """Summit: Shenzhen skyline at dawn, a tall spire above the towers."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
-    # sky
-    draw.rectangle(box, fill=(214, 228, 240))
-    # water
-    draw.rectangle([x0, y0 + int(h * 0.68), x1, y1], fill=(110, 168, 205))
-    for i, wy in enumerate((0.74, 0.82, 0.90)):
-        yy = y0 + int(h * wy)
-        draw.line([(x0 + 12, yy), (x1 - 12, yy)], fill=(255, 255, 255), width=3)
-    deck_y = y0 + int(h * 0.52)
-    # towers
-    tw, th = 16, int(h * 0.52)
-    for tx in (x0 + int(w * 0.16), x0 + int(w * 0.78)):
-        draw.rectangle([tx, deck_y - th, tx + tw, deck_y + 6], fill=(58, 58, 58))
-        draw.rectangle([tx - 6, deck_y - th - 8, tx + tw + 6, deck_y - th], fill=(58, 58, 58))
-    # cables: left span intact, right span intact, middle broken
-    def cable(ax, ay, bx, by, sag):
-        pts = []
-        for i in range(25):
-            t = i / 24
-            x = ax + (bx - ax) * t
-            y = ay + (by - ay) * t + sag * 4 * t * (1 - t)
-            pts.append((x, y))
-        draw.line(pts, fill=(90, 90, 90), width=3)
-    lt = x0 + int(w * 0.16) + 8
-    rt = x0 + int(w * 0.78) + 8
-    cable(x0 + 6, deck_y, lt, deck_y - th + 10, -26)
-    cable(rt, deck_y - th + 10, x1 - 6, deck_y, -26)
-    # deck: left and right sections intact
-    draw.rectangle([x0 + 4, deck_y, x0 + int(w * 0.44), deck_y + 10], fill=(58, 58, 58))
-    draw.rectangle([x0 + int(w * 0.60), deck_y, x1 - 4, deck_y + 10], fill=(58, 58, 58))
-    # collapsed middle: two deck pieces angled down into the water
-    draw.line([(x0 + int(w * 0.44), deck_y + 4), (x0 + int(w * 0.52), y0 + int(h * 0.80))],
-              fill=(58, 58, 58), width=9)
-    draw.line([(x0 + int(w * 0.60), deck_y + 4), (x0 + int(w * 0.52), y0 + int(h * 0.80))],
-              fill=(58, 58, 58), width=9)
-    # dangling cable stubs
-    draw.line([(x0 + int(w * 0.47), deck_y - 18), (x0 + int(w * 0.50), deck_y + 34)],
-              fill=(90, 90, 90), width=3)
-    draw.line([(x0 + int(w * 0.57), deck_y - 18), (x0 + int(w * 0.54), deck_y + 34)],
-              fill=(90, 90, 90), width=3)
-    # smoke puff at the break
-    cx, cy = x0 + int(w * 0.52), deck_y - 26
-    for dx, dy, r in ((-16, 4, 13), (0, -6, 16), (16, 4, 13), (0, 8, 12)):
-        draw.ellipse([cx + dx - r, cy + dy - r, cx + dx + r, cy + dy + r],
-                     fill=(150, 150, 148))
-    # small Ukrainian flag on a pole rising from the left end of the deck
-    fx, fy = x0 + 26, deck_y
-    draw.line([(fx, fy - 30), (fx, fy)], fill=(58, 58, 58), width=2)
-    draw.rectangle([fx, fy - 30, fx + 26, fy - 17], fill=(0, 91, 187))
-    draw.rectangle([fx, fy - 17, fx + 26, fy - 4], fill=(255, 213, 0))
+    # dawn sky
+    draw.rectangle(box, fill=(232, 222, 190))
+    # sun
+    sx, sy = x0 + int(w * 0.72), y0 + int(h * 0.24)
+    draw.ellipse([sx - 20, sy - 20, sx + 20, sy + 20], fill=(232, 184, 75))
+    # skyline: towers of different heights, dark silhouettes
+    base = y0 + int(h * 0.88)
+    towers = [(0.04, 0.52), (0.20, 0.70), (0.36, 0.44), (0.52, 0.62),
+              (0.66, 0.86), (0.82, 0.58)]
+    for fx, fh in towers:
+        tx0 = x0 + int(w * fx)
+        tw = int(w * 0.13)
+        th = int(h * fh)
+        draw.rectangle([tx0, base - th, tx0 + tw, base], fill=(38, 52, 74))
+    # tall spire (Ping An style) rising above the rest
+    px = x0 + int(w * 0.66)
+    draw.polygon([(px - 8, base), (px, y0 + int(h * 0.06)), (px + 8, base)],
+                 fill=(15, 42, 74))
+    # ground
+    draw.rectangle([x0, base, x1, y1], fill=(38, 52, 74))
+    # lit windows
+    for wx, wy in ((0.09, 0.60), (0.25, 0.52), (0.41, 0.68), (0.57, 0.58),
+                   (0.72, 0.46), (0.87, 0.66)):
+        draw.rectangle([x0 + int(w * wx), y0 + int(h * wy),
+                        x0 + int(w * wx) + 5, y0 + int(h * wy) + 5],
+                       fill=(232, 184, 75))
 
 
 def ill_gulf(draw, box):
-    """Gulf: radar dish sweeping, hostile drones overhead, shield below."""
+    """Gulf: radar dish sweeping, hostile drones overhead, shield below.
+    Fixed sizes scale with the box so the picture reads in the large
+    lead slot as well as in a grid cell."""
     x0, y0, x1, y1 = box
     w, h = x1 - x0, y1 - y0
+    sc = min(w, h) / 168.0
     draw.rectangle(box, fill=(245, 232, 200))
     cx, cy = x0 + w // 2, y0 + int(h * 0.62)
     # signal arcs
     for r in (34, 52, 70):
+        r = int(r * sc)
         draw.arc([cx - r, cy - r, cx + r, cy + r], start=200, end=340,
-                 fill=(46, 125, 50), width=4)
+                 fill=(46, 125, 50), width=max(2, int(4 * sc)))
     # radar dish
-    draw.pieslice([cx - 46, cy - 46, cx + 46, cy + 46], start=180, end=360,
+    R = int(46 * sc)
+    draw.pieslice([cx - R, cy - R, cx + R, cy + R], start=180, end=360,
                   fill=(70, 70, 70))
-    draw.rectangle([cx - 4, cy, cx + 4, cy + 34], fill=(70, 70, 70))
-    draw.rectangle([cx - 26, cy + 34, cx + 26, cy + 40], fill=(70, 70, 70))
+    draw.rectangle([cx - int(4 * sc), cy, cx + int(4 * sc), cy + int(34 * sc)],
+                   fill=(70, 70, 70))
+    draw.rectangle([cx - int(26 * sc), cy + int(34 * sc),
+                    cx + int(26 * sc), cy + int(40 * sc)], fill=(70, 70, 70))
     # drones
     def drone(dx, dy, s):
+        s = max(4, int(s * sc))
         draw.ellipse([dx - s, dy - s // 2, dx + s, dy + s // 2], fill=(26, 26, 26))
         draw.line([(dx - s - 6, dy - s // 2 - 4), (dx + s + 6, dy - s // 2 - 4)],
                   fill=(26, 26, 26), width=2)
@@ -151,8 +136,8 @@ def ill_gulf(draw, box):
     bx, by = x0 + int(w * 0.76), y0 + int(h * 0.14)
     for ang in range(0, 360, 45):
         a = math.radians(ang)
-        draw.line([(bx + 16 * math.cos(a), by + 16 * math.sin(a)),
-                   (bx + 26 * math.cos(a), by + 26 * math.sin(a))],
+        draw.line([(bx + 16 * sc * math.cos(a), by + 16 * sc * math.sin(a)),
+                   (bx + 26 * sc * math.cos(a), by + 26 * sc * math.sin(a))],
                   fill=(185, 28, 28), width=3)
 
 
@@ -262,28 +247,28 @@ def render():
     draw_centered(d, W // 2, 62, "WEDNESDAY 18 NOVEMBER 2026", f_date, (255, 255, 255))
     d.line([(W // 2 - 330, 140), (W // 2 + 330, 140)], fill=GOLD, width=2)
     f_sub = font(SANS, 21)
-    draw_centered(d, W // 2, 146, "Five stories that defined the day  —  from Kyiv to the Gulf to Manila",
+    draw_centered(d, W // 2, 146, "Five stories that defined the day  —  from the Gulf to Manila to Shenzhen",
                   f_sub, (200, 214, 228))
 
-    # --- lead story: Crimea bridge ---
-    ill_bridge(d, (24, 196, 400, 454))
+    # --- lead story: Gulf on alert ---
+    ill_gulf(d, (24, 196, 400, 454))
     d.rectangle([24, 196, 400, 454], outline=INK, width=2)
     tx = 424
     f_lkick = font(SANS_BOLD, 20)
-    draw_tracked(d, (tx, 198), "UKRAINE  •  WAR IN EUROPE", f_lkick, RED, tracking=1)
+    draw_tracked(d, (tx, 198), "GULF  •  US–IRAN", f_lkick, RED, tracking=1)
     f_lhead = font(SERIF, 45)
-    d.text((tx, 226), "CRIMEA BRIDGE", font=f_lhead, fill=INK)
-    d.text((tx, 272), "CRIPPLED", font=f_lhead, fill=INK)
+    d.text((tx, 226), "GULF ON ALERT", font=f_lhead, fill=INK)
+    d.text((tx, 272), "DRONES DOWNED", font=f_lhead, fill=INK)
     f_lbody = font(SANS, 23)
-    lead = ("Ukraine's drones and missiles collapse the road arch "
-            "into the sea in the war's biggest drone attack; Russia "
-            "hits Kyiv's bridges in reply.")
+    lead = ("Kuwait's air defences down hostile drones in the early "
+            "hours of Wednesday; Bahrain sounds the all-clear; US jets "
+            "hit an Iran missile site on Qeshm Island.")
     y = 330
     for line in wrap(d, lead, f_lbody, 1000 - tx - 8):
         d.text((tx, y), line, font=f_lbody, fill=INK)
         y += 30
     f_lfoot = font(SANS_BOLD, 19)
-    d.text((tx, 428), "19-km Kerch link shut  •  2 killed",
+    d.text((tx, 428), "No casualties or damage reported",
            font=f_lfoot, fill=GRAY)
 
     # --- divider ---
@@ -291,23 +276,24 @@ def render():
 
     # --- four stories, 2 x 2 grid ---
     stories = [
-        ("GULF  •  US–IRAN", "GULF ON ALERT",
-         "Kuwait's air defences down hostile drones overnight; Bahrain "
-         "sounds the all-clear after threat alerts; US jets hit an Iran "
-         "missile site on Qeshm Island.",
-         ill_gulf, (185, 28, 28)),
-        ("ASIA  •  DIPLOMACY", "TRUMP IN MANILA",
-         "The US president lands for Quad talks ahead of his China visit; "
-         "Putin is due to meet Trump and Xi in Shenzhen on Thursday.",
+        ("ASIA  •  DIPLOMACY", "TRUMP & MARCOS",
+         "The US president meets Ferdinand Marcos Jr. in Manila on "
+         "Wednesday, then flies to Shenzhen for APEC; Putin meets "
+         "Trump and Xi on Thursday.",
          ill_plane, (15, 42, 74)),
         ("TECH  •  MARKETS", "NVIDIA SOARS",
          "Quarterly revenue doubles to $115.8bn; the board says ousted "
          "chief Jensen Huang will not return; Anthropic prices its IPO today.",
          ill_chip, (46, 125, 50)),
         ("WEATHER  •  ASIA", "CYCLONE AKVAN",
-         "The storm over the Bay of Bengal strengthens and is set to "
-         "become severe by Thursday, with heavy rain on the coast.",
+         "The storm over the Bay of Bengal strengthens on Wednesday, "
+         "with heavy rain and winds of 110 km/h on the coast; landfall "
+         "is due on Friday.",
          ill_cyclone, (15, 90, 120)),
+        ("ASIA  •  SUMMIT", "APEC OPENS",
+         "Leaders gather in Shenzhen as the APEC summit opens on "
+         "Wednesday; Trump, Xi and Putin hold their trilateral on Thursday.",
+         ill_summit, (15, 42, 74)),
     ]
     f_ckick = font(SANS_BOLD, 18)
     f_chead = font(SERIF, 31)
